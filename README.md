@@ -88,4 +88,4 @@ cope.
 # License
 Licensed under ~~WTFPL. This shit isn't worth it bros.~~ BSD 3-Clause License.
 
-![](https://i.redd.it/g6pf82y0znx51.gif)
+![](https://media.tenor.com/RPDfI9wZAS0AAAAd/akiyama.gif)
