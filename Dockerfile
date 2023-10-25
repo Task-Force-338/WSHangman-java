@@ -1,21 +1,31 @@
 # Real men either use Alpine as base
 # FROM alpine:latest
-# and wastes their time installing all the dependencies
-# RUN apk add --no-cache python3-dev \
-#     && pip3 install --upgrade pip
+# and wastes their time installing JDK
+# RUN apk add openjdk11
 
-# Or just use Python as base. That exists.
-FROM python:latest 
-# you can specify the version of Python you want to use, but for the sake of simplicity, I'll just use the latest version.
+# Or just use OpenJDK as base. That exists.
+# https://hub.docker.com/_/openjdk OpenJDK image has been deprecated.
+# turns out out of 5 choices offered, Eclipse's build is the most based one.
+FROM eclipse-temurin:latest
+
+# you can specify the version of your OpenJRE you want to use, but for the sake of simplicity, I'll just use the latest version.
 
 # Set the working directory to /app. Gotta keep things clean.
 WORKDIR /app
 
 # Copy the server file into the container at /app
-COPY hangmanserver.py /app
+COPY HangmanServer.java /app
+COPY HangmanGame.java /app
+COPY HangmanWord.java /app
 
-# Is websockets in the standard library? I don't think so.
-RUN pip install websockets
+# Thanks to the fact that I don't use Maven, I have to download the JAR artifact manually.
+RUN wget https://repo1.maven.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar -O /app/gson.jar
+
+# We have to compile the classes first
+RUN javac -cp /app/gson.jar HangmanGame.java
+RUN javac -cp /app/gson.jar HangmanWord.java
+RUN javac -cp /app/gson.jar HangmanServer.java
+
 
 # Expose the port that the server will be listening on. This is for the container's side.
 EXPOSE 8765
@@ -24,7 +34,7 @@ EXPOSE 8765
 # CMD differs from RUN in that it is run when the container is launched, not when the image is built.
 # CMD is also overwritten by the command line arguments when the container is launched.
 # So if you want to run the server with different arguments, you can do so by changing the CMD arguments below.
-CMD ["python", "hangmanserver.py", "0.0.0.0", "8765"]
+CMD ["java", "-cp", "/app:/app/gson.jar", "HangmanServer", "8765"]
 
 # maybe return some funny strings when the server is launched?
 # CMD ["echo", "Hello! I am on Team Chitoge!"]
